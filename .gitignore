@@ -1,0 +1,9 @@
+node_modules/*
+# No editor config
+.vscode
+# Don't be a dummy...!
+*.env
+!example.cloudflare.env
+yarn.lock
+yarn-error.log
+dist/*

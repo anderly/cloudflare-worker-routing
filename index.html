@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>CloudFlare Worker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="main.js"></script>
+    <script>
+    function goFetch() {
+        var url = document.getElementById('url').value;
+        return (async () => {
+            let response = await fetch(url);
+            let json = await response.text();
+
+            document.getElementById('response').value = json;
+        })();
+    }
+    </script>
+</head>
+<body>
+    CloudFlare Worker:
+    URL to Fetch: <input type="text" id="url" value="/route/1" /> <button type="submit" id="btnGo" onclick="goFetch()">Go</button>
+    <br/><br/>
+    <textarea id="response" rows="8" cols="60"></textarea>
+</body>
+</html>

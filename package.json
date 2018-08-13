@@ -1,0 +1,39 @@
+{
+    "name": "cloudflare-worker-routing",
+    "description": "A simple Cloudflare Worker with routing.",
+    "author": "Adam Anderly <adam@anderly.com> (https://github.com/anderly)",
+    "version": "0.1.0",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/anderly/cloudflare-worker-routing"
+    },
+    "bugs": {
+        "url": "https://github.com/anderly/cloudflare-worker-routing/issues"
+    },
+    "homepage": "https://github.com/anderly/cloudflare-worker-routing",
+    "scripts": {
+        "precommit": "./node_modules/.bin/eslint src/*",
+        "clean": "del-cli ./dist/index.js",
+        "build": "webpack",
+        "upload": "node scripts/deploy",
+        "deploy": "npm-run-all -s clean build upload"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.0.0-beta.51",
+        "@babel/core": "^7.0.0-beta.51",
+        "@babel/plugin-proposal-optional-chaining": "^7.0.0-beta.51",
+        "@babel/polyfill": "^7.0.0-beta.51",
+        "@babel/preset-env": "^7.0.0-beta.51",
+        "axios": "^0.18.0",
+        "del-cli": "^1.1.0",
+        "dotenv": "^6.0.0",
+        "esprima": "^4.0.1",
+        "npm-run-all": "^4.1.3",
+        "webpack": "^4.14.0",
+        "webpack-cli": "^3.0.8"
+    },
+    "engines": {
+        "node": ">=6"
+    }
+}
