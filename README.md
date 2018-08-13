@@ -4,13 +4,24 @@ One of the downsides of [CloudFlare Workers](https://www.cloudflare.com/products
 
 Here's a simple CloudFlare Worker with a built-in router that allows you segment your worker logic into different functions and/or "controllers" so you can build something more powerful and with clean separation of concerns while working within the 1 script limit.
 
-Credits to [Dave Willenberg](https://github.com/detroitenglish) and his [Password pwnage CloudFlare Worker](https://github.com/detroitenglish/pw-pwnage-cfworker) for the auto-deploy script and webpack config.
+Sample route definitions:
+
+    router.get('/cloudflare', SampleController.index);
+    router.post('/cloudflare', SampleController.store);
+    router.get('/cloudflare/:id', SampleController.show);
+    router.put('/cloudflare/:id', SampleController.update);
+    router.delete('/cloudflare/:id', SampleController.destroy);
+    router.get('/cloudflare/routes/:id', (req) => {
+        return response('Response from closure instead of controller: id=' + req.params.id);
+    });
 
 - src/index.js is your main CloudFlare Worker entrypoint. Update the routes in the file and point to your functions / controller.
 - src/sample-controller.js contains an example of a basic controller
 - src/router.js contains the basic router (feedback welcome)
 - src/helpers.js contains some simple response/redirect helper functions
 - src/http-method.js is just a simple enum for HTTP verbs.
+
+Credits to [Dave Willenberg](https://github.com/detroitenglish) and his [Password pwnage CloudFlare Worker](https://github.com/detroitenglish/pw-pwnage-cfworker) for the auto-deploy script and webpack config.
 
 ---
 
