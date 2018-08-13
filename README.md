@@ -1,8 +1,6 @@
 # A simple Cloudflare Worker with built-in routing
 
-One of the downsides of [CloudFlare Workers](https://www.cloudflare.com/products/cloudflare-workers/), is that, unless you're on the Enterprise plan, you're stuck with only one worker script. So, the included routing feature isn't very useful because you can't easily achieve different worker logic for different routes.
-
-Here's a simple CloudFlare Worker with a built-in router that allows you segment your worker logic into different functions and/or "controllers" so you can build something more powerful and with clean separation of concerns while working within the 1 script limit.
+Here's a simple CloudFlare Worker with a built-in router that allows you segment your worker logic into different functions and/or "controllers" so you can build something more powerful and with clean separation of concerns while working within the 1 script limit for non-Enterprise plans.
 
 Sample route definitions:
 
