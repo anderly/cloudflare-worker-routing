@@ -40,6 +40,11 @@ async function route(event) {
     try {
         let request = event.request;
 
+        // router.on('/', 'OPTIONS', (req) => {
+        //     let newHeaders = new Headers(req.request.headers);
+        //     newHeaders.set('access-control-allow-origin', '*');
+        //     return new Response('', { status: status, statusText: statusText, headers: newHeaders });
+        // });
         router.get('/cloudflare', SampleController.index);
         router.post('/cloudflare', SampleController.store);
         router.get('/cloudflare/:id', SampleController.show);

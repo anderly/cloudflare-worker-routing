@@ -223,7 +223,7 @@ function Router() {
 
                 _defaultHandler = { handler: func, hooks: args[2] };
             } else {
-                _add(args[0], args[1], args[2]);
+                _add(args[0], args[1], args[2], args[3]);
             }
         } else if (typeof args[0] === 'object') {
             let orderedRoutes = Object.keys(args[0]).sort(compareUrlDepth);
@@ -259,10 +259,10 @@ function Router() {
                     resolve(handler(m));
                 }
                 // Pass-through as no match
-                // resolve(fetch(request));
+                resolve(fetch(request));
                 // Or, return a 404
-                let url = new URL(request.url);
-                resolve(_defaultHandler || response(`No matching round found for url: ${url.pathname}`, 404, 'Not Found', {}));
+                //let url = new URL(request.url);
+                //resolve(_defaultHandler || response(`No matching round found for url: ${url.pathname}`, 404, 'Not Found', {}));
             } catch (ex) {
                 reject(ex);
             }
