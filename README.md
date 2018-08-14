@@ -1,6 +1,6 @@
 # A simple Cloudflare Worker with built-in routing
 
-Here's a simple CloudFlare Worker with a built-in router that allows you segment your worker logic into different functions and/or "controllers" so you can achieve a clean separation of concerns while working within the 1 script limit for non-Enterprise plans.
+Here's a simple CloudFlare Worker with a built-in router that allows you to separate your worker logic into different functions and/or "controllers" so you can achieve a clean separation of concerns while working within the 1 script limit for non-Enterprise plans.
 
 Sample route definitions:
 
