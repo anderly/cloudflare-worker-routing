@@ -13,7 +13,7 @@ Sample route definitions:
         return response('Response from closure instead of controller: id=' + req.params.id);
     });
 
-- src/index.js is your main CloudFlare Worker entrypoint. Update the routes in the file and point to your functions / controller.
+- [src/index.js](blob/master/src/index.js) is your main CloudFlare Worker entrypoint. Update the routes in the file and point to your functions / controller.
 - src/sample-controller.js contains an example of a basic controller
 - src/router.js contains the basic router (feedback welcome)
 - src/helpers.js contains some simple response/redirect helper functions
