@@ -1,124 +1,133 @@
 const HTTP_METHOD = require('./http-method');
 require('./helpers')();
 
-function Router() {
+class Router {
 
-    const PARAMETER_REGEXP = /([:*])(\w+)/g;
-    const WILDCARD_REGEXP = /\*/g;
-    const REPLACE_VARIABLE_REGEXP = '([^\/]+)';
-    const REPLACE_WILDCARD = '(?:.*)';
-    const FOLLOWED_BY_SLASH_REGEXP = '(?:\/$|$)';
-    const MATCH_REGEXP_FLAGS = '';
+    constructor() {
 
-    var _routes = [];
-    var _defaultHandler = null;
+        this.PARAMETER_REGEXP = /([:*])(\w+)/g;
+        this.WILDCARD_REGEXP = /\*/g;
+        this.REPLACE_VARIABLE_REGEXP = '([^\/]+)';
+        this.REPLACE_WILDCARD = '(?:.*)';
+        this.FOLLOWED_BY_SLASH_REGEXP = '(?:\/$|$)';
+        this.MATCH_REGEXP_FLAGS = '';
 
-    var qsToObj = function (url) {
-        let _url = new URL(url);
-        let _params = new URLSearchParams(_url.search);
-        let query = Array.from(_params.keys()).reduce((sum, value) => {
-            return Object.assign({ [value]: _params.get(value) }, sum);
-        }, {});
-        return query;
-    };
+        this.name = name; // this is public
+        this._routes = [];
+        this._defaultHandler = null;
 
-    var formDataToObj = function (formData) {
-        var o = {};
-        for (var pair of formData.entries()) {
-            o[pair[0]] = pair[1];
-        }
-        return o;
-    };
+        this._qsToObj = (url) => {
+            let _url = new URL(url);
+            let _params = new URLSearchParams(_url.search);
+            let query = Array.from(_params.keys()).reduce((sum, value) => {
+                return Object.assign({ [value]: _params.get(value) }, sum);
+            }, {});
+            return query;
+        };
 
-    var clean = function (s) {
-        if (s instanceof RegExp) return s;
-        return s.replace(/\/+$/, '').replace(/^\/+/, '^/');
-    };
+        this._formDataToObj = (formData) => {
+            var o = {};
+            for (var pair of formData.entries()) {
+                o[pair[0]] = pair[1];
+            }
+            return o;
+        };
 
-    var extractRouteParameters = function (match, names) {
-        if (names.length === 0) return null;
-        if (!match) return null;
-        return match
-            .slice(1, match.length)
-            .reduce((params, value, index) => {
-                if (params === null) params = {};
-                params[names[index]] = decodeURIComponent(value);
-                return params;
-            }, null);
-    };
+        this._clean = (s) => {
+            if (s instanceof RegExp) return s;
+            return s.replace(/\/+$/, '').replace(/^\/+/, '^/');
+        };
 
-    var replaceDynamicURLParts = function (route) {
-        var paramNames = [], regexp;
+        this._extractRouteParameters = (match, names) => {
+            if (names.length === 0) return null;
+            if (!match) return null;
+            return match
+                .slice(1, match.length)
+                .reduce((params, value, index) => {
+                    if (params === null) params = {};
+                    params[names[index]] = decodeURIComponent(value);
+                    return params;
+                }, null);
+        };
 
-        if (route instanceof RegExp) {
-            regexp = route;
-        } else {
-            regexp = new RegExp(
-                route.replace(PARAMETER_REGEXP, function (full, dots, name) {
-                    paramNames.push(name);
-                    return REPLACE_VARIABLE_REGEXP;
-                }).replace(WILDCARD_REGEXP, REPLACE_WILDCARD) + FOLLOWED_BY_SLASH_REGEXP, MATCH_REGEXP_FLAGS);
-        }
-        return { regexp, paramNames };
-    };
+        this._replaceDynamicURLParts = (route) => {
+            var paramNames = [], regexp;
 
-    var getUrlDepth = function (url) {
-        return url.replace(/\/$/, '').split('/').length;
-    };
+            if (route instanceof RegExp) {
+                regexp = route;
+            } else {
+                regexp = new RegExp(
+                    route.replace(this.PARAMETER_REGEXP, function (full, dots, name) {
+                        paramNames.push(name);
+                        return this.REPLACE_VARIABLE_REGEXP;
+                    }).replace(this.WILDCARD_REGEXP, this.REPLACE_WILDCARD) + this.FOLLOWED_BY_SLASH_REGEXP, this.MATCH_REGEXP_FLAGS);
+            }
+            return { regexp, paramNames };
+        };
 
-    var compareUrlDepth = function (urlA, urlB) {
-        return getUrlDepth(urlB) - getUrlDepth(urlA);
-    };
+        this._getUrlDepth = (url) => {
+            return url.replace(/\/$/, '').split('/').length;
+        };
 
-    var matchRoutes = function (request, form, routes = []) {
-        let requestUrl = new URL(request.url);
+        this._compareUrlDepth = (urlA, urlB) => {
+            return this._getUrlDepth(urlB) - this._getUrlDepth(urlA);
+        };
 
-        return routes
-            .map(route => {
-                var { regexp, paramNames } = replaceDynamicURLParts(clean(route.route));
-                var match = requestUrl.pathname.replace(/^\/+/, '/').match(regexp);
+        this._matchRoutes = (request, form, routes = []) => {
+            let requestUrl = new URL(request.url);
 
-                if (match && route.method !== request.method) {
-                    match = false;
-                }
+            return routes
+                .map(route => {
+                    var { regexp, paramNames } = this._replaceDynamicURLParts(this._clean(route.route));
+                    var match = requestUrl.pathname.replace(/^\/+/, '/').match(regexp);
 
-                var params = extractRouteParameters(match, paramNames);
+                    if (match && route.method !== request.method) {
+                        match = false;
+                    }
 
-                params = Object.assign({}, params, qsToObj(request.url));
-                var body = null;
+                    var params = this._extractRouteParameters(match, paramNames);
 
-                const contentType = request.headers.get('content-type');
-                if (request.method === HTTP_METHOD.POST && contentType === 'application/x-www-form-urlencoded') {
-                    body = form ? formDataToObj(form) : form;
-                }
+                    params = Object.assign({}, params, this._qsToObj(request.url));
+                    var body = null;
 
-                return match ? { match, url: request.url, request, route, params, body, query: params } : false;
-            })
-            .filter(m => m);
-    };
+                    const contentType = request.headers.get('content-type');
+                    if (request.method === HTTP_METHOD.POST && contentType === 'application/x-www-form-urlencoded') {
+                        body = form ? this._formDataToObj(form) : form;
+                    }
 
-    var _match = function (request, formData) {
-        return matchRoutes(request, formData, _routes)[0] || false;
-    };
+                    return match ? { match, url: request.url, request, route, params, body, query: params } : false;
+                })
+                .filter(m => m);
+        };
 
-    var _add = function (route, method = HTTP_METHOD.GET, handler = null, hooks = null) {
-        if (typeof route === 'string') {
-            route = encodeURI(route);
-        }
-        _routes.push(
-            typeof handler === 'object' ? {
-                route,
-                method: method,
-                handler: handler.uses,
-                name: handler.as,
-                hooks: hooks || handler.hooks
-            } : { route, method, handler, hooks: hooks }
-        );
+        this._match = (request, formData) => {
+            return this._matchRoutes(request, formData, this._routes)[0] || false;
+        };
 
-        return _add;
-    };
+        this._add = (route, method = HTTP_METHOD.GET, handler = null, hooks = null) => {
+            if (typeof route === 'string') {
+                route = encodeURI(route);
+            }
+            this._routes.push(
+                typeof handler === 'object' ? {
+                    route,
+                    method: method,
+                    handler: handler.uses,
+                    name: handler.as,
+                    hooks: hooks || handler.hooks
+                } : { route, method, handler, hooks: hooks }
+            );
 
-    var _get = function (...args) {
+            return _add;
+        };
+
+    } //end constructor
+
+    /**
+     * GET request
+     * @param {*} args
+     */
+    get(...args) {
         if (args.length >= 2) {
             if (args[0] === '/') {
                 let func = args[1];
@@ -127,21 +136,26 @@ function Router() {
                     func = args[1].uses;
                 }
 
-                _defaultHandler = { handler: func, hooks: args[2] };
+                this._defaultHandler = { handler: func, hooks: args[2] };
             } else {
-                _add(args[0], HTTP_METHOD.GET, args[1], args[2]);
+                this._add(args[0], HTTP_METHOD.GET, args[1], args[2]);
             }
         } else if (typeof args[0] === 'object') {
-            let orderedRoutes = Object.keys(args[0]).sort(compareUrlDepth);
+            let orderedRoutes = Object.keys(args[0]).sort(this._compareUrlDepth);
 
             orderedRoutes.forEach(route => {
-                _on(route, args[0][route]);
+                this.on(route, args[0][route]);
             });
         }
         return this;
-    };
 
-    var _post = function (...args) {
+    } //end get
+
+    /**
+     * POST request
+     * @param {*} args
+     */
+    post(...args) {
         if (args.length >= 2) {
             if (args[0] === '/') {
                 let func = args[1];
@@ -150,21 +164,26 @@ function Router() {
                     func = args[1].uses;
                 }
 
-                _defaultHandler = { handler: func, hooks: args[2] };
+                this._defaultHandler = { handler: func, hooks: args[2] };
             } else {
-                _add(args[0], HTTP_METHOD.POST, args[1], args[2]);
+                this._add(args[0], HTTP_METHOD.POST, args[1], args[2]);
             }
         } else if (typeof args[0] === 'object') {
             let orderedRoutes = Object.keys(args[0]).sort(compareUrlDepth);
 
             orderedRoutes.forEach(route => {
-                _on(route, args[0][route]);
+                this.on(route, args[0][route]);
             });
         }
         return this;
-    };
 
-    var _put = function (...args) {
+    } //end post
+
+    /**
+     * PUT request
+     * @param {*} args
+     */
+    put(...args) {
         if (args.length >= 2) {
             if (args[0] === '/') {
                 let func = args[1];
@@ -173,21 +192,26 @@ function Router() {
                     func = args[1].uses;
                 }
 
-                _defaultHandler = { handler: func, hooks: args[2] };
+                this._defaultHandler = { handler: func, hooks: args[2] };
             } else {
-                _add(args[0], HTTP_METHOD.PUT, args[1], args[2]);
+                this._add(args[0], HTTP_METHOD.PUT, args[1], args[2]);
             }
         } else if (typeof args[0] === 'object') {
             let orderedRoutes = Object.keys(args[0]).sort(compareUrlDepth);
 
             orderedRoutes.forEach(route => {
-                _on(route, args[0][route]);
+                this.on(route, args[0][route]);
             });
         }
         return this;
-    };
 
-    var _delete = function (...args) {
+    } //end put
+
+    /**
+     * DELETE request
+     * @param {*} args
+     */
+    delete(...args) {
         if (args.length >= 2) {
             if (args[0] === '/') {
                 let func = args[1];
@@ -196,21 +220,26 @@ function Router() {
                     func = args[1].uses;
                 }
 
-                _defaultHandler = { handler: func, hooks: args[2] };
+                this._defaultHandler = { handler: func, hooks: args[2] };
             } else {
-                _add(args[0], HTTP_METHOD.DELETE, args[1], args[2]);
+                this._add(args[0], HTTP_METHOD.DELETE, args[1], args[2]);
             }
         } else if (typeof args[0] === 'object') {
             let orderedRoutes = Object.keys(args[0]).sort(compareUrlDepth);
 
             orderedRoutes.forEach(route => {
-                _on(route, args[0][route]);
+                this._on(route, args[0][route]);
             });
         }
         return this;
-    };
 
-    var _on = function (...args) {
+    } //end delete
+
+    /**
+     * General route
+     * @param {*} args
+     */
+    on(...args) {
         if (typeof args[0] === 'function') {
             _defaultHandler = { handler: args[0], hooks: args[1] };
         } else if (args.length >= 2) {
@@ -221,25 +250,34 @@ function Router() {
                     func = args[1].uses;
                 }
 
-                _defaultHandler = { handler: func, hooks: args[2] };
+                this._defaultHandler = { handler: func, hooks: args[2] };
             } else {
-                _add(args[0], args[1], args[2], args[3]);
+                this._add(args[0], args[1], args[2], args[3]);
             }
         } else if (typeof args[0] === 'object') {
             let orderedRoutes = Object.keys(args[0]).sort(compareUrlDepth);
 
             orderedRoutes.forEach(route => {
-                _on(route, args[0][route]);
+                this._on(route, args[0][route]);
             });
         }
         return this;
-    };
 
-    var _else = function(defaultHandler) {
-        _defaultHandler = defaultHandler;
-    };
+    } //end on
 
-    var _route = async function (request) {
+    /**
+     * Register a default not found handler
+     * @param {*} defaultHandler
+     */
+    else(defaultHandler) {
+        this._defaultHandler = defaultHandler;
+    }
+
+    /**
+     * Route the request
+     * @param {*} request
+     */
+    async route(request) {
 
         return new Promise(async (resolve, reject) => {
             try {
@@ -251,7 +289,7 @@ function Router() {
                     formData = await request.formData();
                 }
 
-                m = _match(request, formData);
+                m = this._match(request, formData);
 
                 if (m) {
                     handler = m.route.handler;
@@ -267,24 +305,9 @@ function Router() {
                 reject(ex);
             }
         });
-    };
 
-    return {
+    } //end route
 
-        get: _get,
-
-        post: _post,
-
-        put: _put,
-
-        delete: _delete,
-
-        on: _on,
-
-        else: _else,
-
-        route: _route,
-    }
-}; //end Router
+} //end Class Router
 
 export default new Router();
