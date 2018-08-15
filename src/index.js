@@ -55,7 +55,7 @@ async function route(event) {
                 res: '<html><body><a href="https://github.com/anderly/cloudflare-worker-routing/blob/master/src/index.js#L53-L59" target="_blank" title="See the source that generated this on GitHub">Response from closure instead of controller</a>: id=' + req.params.id + '</body></html>',
                 headers: { 'content-type': 'text/html' },
             };
-            return response();
+            return response(res);
         });
         return router.route(request);
 
