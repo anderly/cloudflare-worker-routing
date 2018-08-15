@@ -25,4 +25,9 @@ module.exports = {
     performance: {
         hints: false,
     },
+    plugins: [
+        new webpack.DefinePlugin({
+            LAST_MODIFIED: JSON.stringify(new Date().toJSON()),
+        }),
+    ],
 };

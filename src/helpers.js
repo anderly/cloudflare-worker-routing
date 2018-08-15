@@ -13,6 +13,7 @@ module.exports = function() {
         }
         let newHeaders = new Headers(headers);
         newHeaders.set('X-CloudFlare-Worker', 'Served by CloudFlare Worker.');
+        newHeaders.set('X-CloudFlare-Worker-Last-Modified',  LAST_MODIFIED);
 
         // let text = (async () => {
         //     return await res.text();

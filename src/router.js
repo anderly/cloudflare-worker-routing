@@ -12,7 +12,6 @@ class Router {
         this.FOLLOWED_BY_SLASH_REGEXP = '(?:\/$|$)';
         this.MATCH_REGEXP_FLAGS = '';
 
-        this.name = name; // this is public
         this._routes = [];
         this._defaultHandler = null;
 
@@ -57,7 +56,7 @@ class Router {
                 regexp = route;
             } else {
                 regexp = new RegExp(
-                    route.replace(this.PARAMETER_REGEXP, function (full, dots, name) {
+                    route.replace(this.PARAMETER_REGEXP, (full, dots, name) => {
                         paramNames.push(name);
                         return this.REPLACE_VARIABLE_REGEXP;
                     }).replace(this.WILDCARD_REGEXP, this.REPLACE_WILDCARD) + this.FOLLOWED_BY_SLASH_REGEXP, this.MATCH_REGEXP_FLAGS);
@@ -118,7 +117,7 @@ class Router {
                 } : { route, method, handler, hooks: hooks }
             );
 
-            return _add;
+            return this._add;
         };
 
     } //end constructor
