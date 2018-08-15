@@ -1,6 +1,6 @@
 # A simple Cloudflare Worker with built-in routing
 
-Here's a simple CloudFlare Worker with a built-in router that allows you segment your worker logic into different functions and/or "controllers" so you can achieve a clean separation of concerns while working within the 1 script limit for non-Enterprise plans.
+Here's a simple CloudFlare Worker with a built-in router that allows you to separate your worker logic into different functions and/or "controllers" so you can achieve a clean separation of concerns while working within the 1 script limit for non-Enterprise plans.
 
 Sample route definitions:
 
@@ -13,11 +13,11 @@ Sample route definitions:
         return response('Response from closure instead of controller: id=' + req.params.id);
     });
 
-- src/index.js is your main CloudFlare Worker entrypoint. Update the routes in the file and point to your functions / controller.
-- src/sample-controller.js contains an example of a basic controller
-- src/router.js contains the basic router (feedback welcome)
-- src/helpers.js contains some simple response/redirect helper functions
-- src/http-method.js is just a simple enum for HTTP verbs.
+- [src/index.js](src/index.js) is your main CloudFlare Worker entrypoint. Update the routes in the file and point to your functions / controller.
+- [src/sample-controller.js](src/sample-controller.js) contains an example of a basic controller
+- [src/router.js](src/router.js) contains the basic router (feedback welcome)
+- [src/helpers.js](src/helpers.js) contains some simple response/redirect helper functions
+- [src/http-method.js](src/helpers.js) is just a simple enum for HTTP verbs.
 
 Credits to [Dave Willenberg](https://github.com/detroitenglish) and his [Password pwnage CloudFlare Worker](https://github.com/detroitenglish/pw-pwnage-cfworker) for the auto-deploy script and webpack config.
 
