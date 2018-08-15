@@ -10,6 +10,9 @@ module.exports = {
     },
     target: 'webworker',
     mode: 'production',
+    optimization: {
+        minimize: false,
+    },
     module: {
         rules: [
             {
