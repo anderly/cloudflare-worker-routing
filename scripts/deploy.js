@@ -21,8 +21,8 @@ const { AUTH_EMAIL, AUTH_KEY, ZONE_ID } = process.env
             },
             data: Buffer.from(script),
         }).catch(err => {
-            console.error(JSON.stringify(err.response.data, null, 2))
-            // return process.exit(1)
+            console.error(JSON.stringify(err.data, null, 2));
+
         });
         if (result.data.success) {
             return console.info(`Worker upload successful 🚀`);
