@@ -51,7 +51,11 @@ async function route(event) {
         router.put('/cloudflare/:id', SampleController.update);
         router.delete('/cloudflare/:id', SampleController.destroy);
         router.get('/cloudflare/routes/:id', (req) => {
-            return response('Response from closure instead of controller: id=' + req.params.id);
+            let res = {
+                res: '<html><body><a href="https://github.com/anderly/cloudflare-worker-routing/blob/master/src/index.js#L53-L59" target="_blank" title="See the source that generated this on GitHub">Response from closure instead of controller</a>: id=' + req.params.id + '</body></html>',
+                headers: { 'content-type': 'text/html' },
+            };
+            return response();
         });
         return router.route(request);
 

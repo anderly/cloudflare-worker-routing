@@ -7,6 +7,10 @@ module.exports = function() {
      * @param {*} statusText
      */
     response = function(res, status = 200, statusText = 'OK', headers = {}) {
+        if (typeof res === 'object') {
+            var { status, statusText, headers } = res;
+            res = res.res;
+        }
         let newHeaders = new Headers(headers);
         newHeaders.set('X-CloudFlare-Worker', 'Served by CloudFlare Worker.');
 
