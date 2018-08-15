@@ -2,7 +2,7 @@
     "name": "cloudflare-worker-routing",
     "description": "A simple Cloudflare Worker with routing.",
     "author": "Adam Anderly <adam@anderly.com> (https://github.com/anderly)",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "license": "MIT",
     "repository": {
         "type": "git",
