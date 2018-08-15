@@ -1,5 +1,15 @@
 {
   "presets": [
-    ["@babel/env"]
+    [
+      "@babel/preset-env",
+      {
+        "modules": false,
+        "loose": true,
+        "useBuiltIns": "usage"
+      }
+    ]
+  ],
+  "plugins": [
+    "closure-elimination"
   ]
 }
