@@ -34,4 +34,4 @@ class SampleController {
     }
 }
 
-module.exports = new SampleController();
+export default new SampleController();

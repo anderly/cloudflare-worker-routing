@@ -287,4 +287,4 @@ function Router() {
     }
 }; //end Router
 
-module.exports = new Router();
+export default new Router();
