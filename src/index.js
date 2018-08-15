@@ -1,5 +1,5 @@
-const router = require('./router');
-const SampleController = require('./sample-controller');
+import { default as router} from './router';
+import { default as SampleController} from './sample-controller';
 
 addEventListener('install', event => {
     console.log('Installing CloudFlare Worker...');
