@@ -286,6 +286,9 @@ class Router {
                 const contentType = request.headers.get('content-type');
                 if (request.method === HTTP_METHOD.POST && contentType === 'application/x-www-form-urlencoded') {
                     formData = await request.formData();
+                    // The original request's body is now consumed. Replace the request with
+                    // a clone using the parsed body, so that we can still pass it to fetch().
+                    request = new Request(request, {body: formData})
                 }
 
                 m = this._match(request, formData);
@@ -294,6 +297,7 @@ class Router {
                     handler = m.route.handler;
 
                     resolve(handler(m));
+                    return;
                 }
                 // Pass-through as no match
                 resolve(fetch(request));
