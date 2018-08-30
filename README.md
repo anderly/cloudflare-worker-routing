@@ -17,7 +17,7 @@ Sample route definitions:
 - [src/sample-controller.js](src/sample-controller.js) contains an example of a basic controller
 - [src/router.js](src/router.js) contains the basic router (feedback welcome)
 - [src/helpers.js](src/helpers.js) contains some simple response/redirect helper functions
-- [src/http-method.js](src/helpers.js) is just a simple enum for HTTP verbs.
+- [src/http-method.js](src/http-method.js) is just a simple enum for HTTP verbs.
 
 Credits to [Dave Willenberg](https://github.com/detroitenglish) and his [Password pwnage CloudFlare Worker](https://github.com/detroitenglish/pw-pwnage-cfworker) for the auto-deploy script and webpack config.
 
