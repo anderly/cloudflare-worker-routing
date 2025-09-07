@@ -1,6 +1,21 @@
 import { default as router} from './router';
 import { default as SampleController} from './sample-controller';
 
+// Register routes once at startup, not on every request
+// This is critical for performance under heavy load
+router.get('/cloudflare', SampleController.index);
+router.post('/cloudflare', SampleController.store);
+router.get('/cloudflare/:id', SampleController.show);
+router.put('/cloudflare/:id', SampleController.update);
+router.delete('/cloudflare/:id', SampleController.destroy);
+router.get('/cloudflare/routes/:id', (req) => {
+    let res = {
+        res: '<html><body><a href="https://github.com/anderly/cloudflare-worker-routing/blob/master/src/index.js#L53-L59" target="_blank" title="See the source that generated this on GitHub">Response from closure instead of controller</a>: id=' + req.params.id + '</body></html>',
+        headers: { 'content-type': 'text/html' },
+    };
+    return response(res);
+});
+
 addEventListener('install', event => {
     console.log('Installing CloudFlare Worker...');
 });
@@ -45,18 +60,7 @@ async function route(event) {
         //     newHeaders.set('access-control-allow-origin', '*');
         //     return new Response('', { status: status, statusText: statusText, headers: newHeaders });
         // });
-        router.get('/cloudflare', SampleController.index);
-        router.post('/cloudflare', SampleController.store);
-        router.get('/cloudflare/:id', SampleController.show);
-        router.put('/cloudflare/:id', SampleController.update);
-        router.delete('/cloudflare/:id', SampleController.destroy);
-        router.get('/cloudflare/routes/:id', (req) => {
-            let res = {
-                res: '<html><body><a href="https://github.com/anderly/cloudflare-worker-routing/blob/master/src/index.js#L53-L59" target="_blank" title="See the source that generated this on GitHub">Response from closure instead of controller</a>: id=' + req.params.id + '</body></html>',
-                headers: { 'content-type': 'text/html' },
-            };
-            return response(res);
-        });
+        
         return router.route(request);
 
     } catch (ex) {
