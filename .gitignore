@@ -7,3 +7,5 @@ node_modules/*
 yarn.lock
 yarn-error.log
 dist/*
+# Test coverage reports
+coverage/

@@ -74,29 +74,56 @@ class Router {
 
         this._matchRoutes = (request, form, routes = []) => {
             let requestUrl = new URL(request.url);
+            const cleanPath = requestUrl.pathname.replace(/^\/+/, '/');
 
-            return routes
-                .map(route => {
-                    var { regexp, paramNames } = this._replaceDynamicURLParts(this._clean(route.route));
-                    var match = requestUrl.pathname.replace(/^\/+/, '/').match(regexp);
+            // Optimize: loop through routes and return on first match instead of mapping all
+            for (let i = 0; i < routes.length; i++) {
+                const route = routes[i];
+                
+                // Use pre-compiled regex if available, otherwise compile on demand
+                let regexp, paramNames;
+                if (route.regexp && route.paramNames) {
+                    regexp = route.regexp;
+                    paramNames = route.paramNames;
+                } else {
+                    // Fallback for routes that weren't pre-compiled
+                    const compiled = this._replaceDynamicURLParts(this._clean(route.route));
+                    regexp = compiled.regexp;
+                    paramNames = compiled.paramNames;
+                }
 
-                    if (match && route.method !== request.method) {
-                        match = false;
-                    }
+                const match = cleanPath.match(regexp);
 
-                    var params = this._extractRouteParameters(match, paramNames);
+                // Skip if no match or method doesn't match
+                if (!match || route.method !== request.method) {
+                    continue;
+                }
 
-                    params = Object.assign({}, params, this._qsToObj(request.url));
-                    var body = null;
+                // Extract parameters and query string
+                const params = this._extractRouteParameters(match, paramNames);
+                const queryParams = this._qsToObj(request.url);
+                const allParams = Object.assign({}, params, queryParams);
+                
+                let body = null;
+                const contentType = request.headers.get('content-type');
+                if (request.method === HTTP_METHOD.POST && contentType === 'application/x-www-form-urlencoded') {
+                    body = form ? this._formDataToObj(form) : form;
+                }
 
-                    const contentType = request.headers.get('content-type');
-                    if (request.method === HTTP_METHOD.POST && contentType === 'application/x-www-form-urlencoded') {
-                        body = form ? this._formDataToObj(form) : form;
-                    }
-
-                    return match ? { match, url: request.url, request, route, params, body, query: params } : false;
-                })
-                .filter(m => m);
+                // Return immediately on first match
+                return [{ 
+                    match, 
+                    url: request.url, 
+                    request, 
+                    route, 
+                    params: allParams, 
+                    body, 
+                    query: allParams 
+                }];
+            }
+            
+            // No matches found
+            return [];
         };
 
         this._match = (request, formData) => {
@@ -107,14 +134,29 @@ class Router {
             if (typeof route === 'string') {
                 route = encodeURI(route);
             }
+            
+            // Pre-compile regex patterns for better performance
+            const { regexp, paramNames } = this._replaceDynamicURLParts(this._clean(route));
+            
             this._routes.push(
                 typeof handler === 'object' ? {
                     route,
                     method: method,
                     handler: handler.uses,
                     name: handler.as,
-                    hooks: hooks || handler.hooks
-                } : { route, method, handler, hooks: hooks }
+                    hooks: hooks || handler.hooks,
+                    // Store pre-compiled regex and param names
+                    regexp,
+                    paramNames
+                } : { 
+                    route, 
+                    method, 
+                    handler, 
+                    hooks: hooks,
+                    // Store pre-compiled regex and param names
+                    regexp,
+                    paramNames
+                }
             );
 
             return this._add;
@@ -168,7 +210,7 @@ class Router {
                 this._add(args[0], HTTP_METHOD.POST, args[1], args[2]);
             }
         } else if (typeof args[0] === 'object') {
-            let orderedRoutes = Object.keys(args[0]).sort(compareUrlDepth);
+            let orderedRoutes = Object.keys(args[0]).sort(this._compareUrlDepth);
 
             orderedRoutes.forEach(route => {
                 this.on(route, args[0][route]);
@@ -196,7 +238,7 @@ class Router {
                 this._add(args[0], HTTP_METHOD.PUT, args[1], args[2]);
             }
         } else if (typeof args[0] === 'object') {
-            let orderedRoutes = Object.keys(args[0]).sort(compareUrlDepth);
+            let orderedRoutes = Object.keys(args[0]).sort(this._compareUrlDepth);
 
             orderedRoutes.forEach(route => {
                 this.on(route, args[0][route]);
@@ -224,7 +266,7 @@ class Router {
                 this._add(args[0], HTTP_METHOD.DELETE, args[1], args[2]);
             }
         } else if (typeof args[0] === 'object') {
-            let orderedRoutes = Object.keys(args[0]).sort(compareUrlDepth);
+            let orderedRoutes = Object.keys(args[0]).sort(this._compareUrlDepth);
 
             orderedRoutes.forEach(route => {
                 this._on(route, args[0][route]);
@@ -240,7 +282,7 @@ class Router {
      */
     on(...args) {
         if (typeof args[0] === 'function') {
-            _defaultHandler = { handler: args[0], hooks: args[1] };
+            this._defaultHandler = { handler: args[0], hooks: args[1] };
         } else if (args.length >= 2) {
             if (args[0] === '/') {
                 let func = args[1];
@@ -254,7 +296,7 @@ class Router {
                 this._add(args[0], args[1], args[2], args[3]);
             }
         } else if (typeof args[0] === 'object') {
-            let orderedRoutes = Object.keys(args[0]).sort(compareUrlDepth);
+            let orderedRoutes = Object.keys(args[0]).sort(this._compareUrlDepth);
 
             orderedRoutes.forEach(route => {
                 this._on(route, args[0][route]);
